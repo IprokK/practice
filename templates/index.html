@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Робот Патрик</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const socket = io();
+
+            function sendEmotion(emotion) {
+                socket.emit('change_emotion', {emotion: emotion});
+            }
+
+            socket.on('update_face', function(data) {
+                drawFace(data);
+            });
+
+            function drawFace(data) {
+                const canvas = document.getElementById('face');
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = 'black';
+                if (data.eyebrows === 'raised') {
+                    ctx.fillRect(90, 30, 70, 15);
+                    ctx.fillRect(240, 30, 70, 15);
+                } else if (data.eyebrows === 'angry') {
+                    ctx.fillRect(90, 40, 70, 20);
+                    ctx.fillRect(240, 40, 70, 20);
+                } else if (data.eyebrows === 'down') {
+                    ctx.fillRect(90, 50, 70, 10);
+                    ctx.fillRect(240, 50, 70, 10);
+                } else {
+                    ctx.fillRect(100, 40, 60, 10);
+                    ctx.fillRect(250, 40, 60, 10);
+                }
+
+                ctx.fillStyle = 'black';
+                if (data.eyes === 'wide') {
+                    ctx.fillRect(100, 70, 50, 70);
+                    ctx.fillRect(250, 70, 50, 70);
+                } else if (data.eyes === 'narrow') {
+                    ctx.fillRect(100, 90, 50, 10);
+                    ctx.fillRect(250, 90, 50, 10);
+                } else if (data.eyes === 'half_closed') {
+                    ctx.fillRect(100, 85, 50, 20);
+                    ctx.fillRect(250, 85, 50, 20);
+                } else if (data.eyes === 'squint') {
+                    ctx.fillRect(100, 90, 50, 5);
+                    ctx.fillRect(250, 90, 50, 5);
+                } else {
+                    ctx.fillRect(100, 80, 50, 50);
+                    ctx.fillRect(250, 80, 50, 50);
+                }
+
+                ctx.beginPath();
+                if (data.mouth === 'smile') {
+                    ctx.arc(200, 200, 50, 0, Math.PI, false);
+                } else if (data.mouth === 'frown') {
+                    ctx.arc(200, 250, 50, 0, Math.PI, true);
+                } else if (data.mouth === 'open') {
+                    ctx.ellipse(200, 200, 50, 30, 0, 0, Math.PI * 2);
+                } else if (data.mouth === 'tight') {
+                    ctx.rect(150, 200, 100, 20);
+                } else if (data.mouth === 'talking') {
+                    ctx.ellipse(200, 200, 50, 20 + Math.random() * 10, 0, 0, Math.PI * 2);
+                } else {
+                    ctx.ellipse(200, 200, 50, 20, 0, 0, Math.PI * 2);
+                }
+                ctx.fill();
+            }
+
+            document.querySelectorAll('.emotion-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    sendEmotion(this.dataset.emotion);
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <button class="emotion-button" data-emotion="happy">Счастливый</button>
+    <button class="emotion-button" data-emotion="sad">Грустный</button>
+    <button class="emotion-button" data-emotion="surprised">Удивленный</button>
+    <button class="emotion-button" data-emotion="angry">Злой</button>
+    <button class="emotion-button" data-emotion="joy_narrow_eyes">Радость с узкими глазами</button>
+    <button class="emotion-button" data-emotion="calm">Умиротворение</button>
+    <button class="emotion-button" data-emotion="squinting">Прищуривание</button>
+    <canvas id="face" width="400" height="300"></canvas>
+</body>
+</html>
